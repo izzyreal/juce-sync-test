@@ -52,6 +52,7 @@ public:
     void toggleMasterSlave();
     bool isMaster();
     float getTempo();
+    void setTempo(float tempo);
 
 private:
     std::vector<short> metronomeSampleData{0, 2047, 4092, 6145, 8186, 10239, 12284, 14329, 14333, 14330, 14330, 14332,
@@ -61,8 +62,12 @@ private:
                                            14331, 14330, 14330, 14334, 14328, 1};
 
     std::atomic<float> tempo = 120.0;
-    double framesPerClock = 918.75;
-    short framesPerQuarterNote = 22050;
+
+    void initSampleRateAndTempoDependentConstants(const double sampleRate);
+
+    double framesPerClock = 0.0;
+
+    unsigned int framesPerQuarterNote = 0;
 
     long long frameCounter = 0;
 

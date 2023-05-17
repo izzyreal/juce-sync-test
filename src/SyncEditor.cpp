@@ -44,8 +44,12 @@ SyncEditor::SyncEditor(SyncProcessor& p)
     updateTempoButtonText();
     addAndMakeVisible(tempoLabel);
 
-    tempoLabel.onTextChange = [this]{
-        tempoLabel.getText();
+    tempoLabel.onEditorHide = [this]{
+        auto text = tempoLabel.getText();
+        float newTempo = 0.0;
+        try { newTempo = std::stof(text.toStdString()); }
+        catch (const std::exception&) { return; }
+        syncProcessor.setTempo(newTempo);
     };
 
     setSize(320, 200);

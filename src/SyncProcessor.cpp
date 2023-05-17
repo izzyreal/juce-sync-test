@@ -67,7 +67,15 @@ void SyncProcessor::changeProgramName(int index, const juce::String &newName)
 //==============================================================================
 void SyncProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    juce::ignoreUnused(sampleRate, samplesPerBlock);
+    juce::ignoreUnused(samplesPerBlock);
+
+    frameCounter = 0;
+
+    nextClockIsInHowManyFrames = 0;
+
+    playStartFrame = 0;
+
+    initSampleRateAndTempoDependentConstants(sampleRate);
 }
 
 void SyncProcessor::releaseResources()
@@ -221,9 +229,21 @@ bool SyncProcessor::isMaster()
     return master.load();
 }
 
+void SyncProcessor::setTempo(float tempoToUse)
+{
+    tempo.store(std::clamp<float>(tempoToUse, 30, 300));
+    initSampleRateAndTempoDependentConstants(getSampleRate());
+}
+
 float SyncProcessor::getTempo()
 {
     return tempo.load();
+}
+
+void SyncProcessor::initSampleRateAndTempoDependentConstants(const double sampleRate)
+{
+    framesPerClock = (sampleRate / 48.0) * (120.0 / tempo);
+    framesPerQuarterNote = static_cast<unsigned int>(framesPerClock * 24);
 }
 
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
