@@ -221,6 +221,11 @@ bool SyncProcessor::isMaster()
     return master.load();
 }
 
+float SyncProcessor::getTempo()
+{
+    return tempo.load();
+}
+
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
 {
     return new SyncProcessor();

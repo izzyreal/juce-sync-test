@@ -51,6 +51,7 @@ public:
 
     void toggleMasterSlave();
     bool isMaster();
+    float getTempo();
 
 private:
     std::vector<short> metronomeSampleData{0, 2047, 4092, 6145, 8186, 10239, 12284, 14329, 14333, 14330, 14330, 14332,
@@ -59,18 +60,19 @@ private:
                                            14330, 14330, 14333, 14331, 14330, 14331, 14331, 14329, 14331, 14331, 14331,
                                            14331, 14330, 14330, 14334, 14328, 1};
 
-    // 120BPM
-    const float framesPerClock = 918.75;
-    const short framesPerQuarterNote = 22050;
+    std::atomic<float> tempo = 120.0;
+    double framesPerClock = 918.75;
+    short framesPerQuarterNote = 22050;
 
-    int frameCounter = 0;
+    long long frameCounter = 0;
+
     char metronomeFrameIndex = 127;
     float nextClockIsInHowManyFrames = 0.f;
 
     // Counts to 4 to provide accents
     char metronomeCounter = 3;
 
-    int playStartFrame = -1;
+    long long playStartFrame = -1;
     std::atomic<bool> playing{false };
     std::atomic<bool> master{true };
     bool wasPlaying{false};

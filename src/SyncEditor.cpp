@@ -38,6 +38,16 @@ SyncEditor::SyncEditor(SyncProcessor& p)
         }
     };
 
+    tempoLabel.setBounds(150, 0, 50, 30);
+    tempoLabel.setEditable(true);
+
+    updateTempoButtonText();
+    addAndMakeVisible(tempoLabel);
+
+    tempoLabel.onTextChange = [this]{
+        tempoLabel.getText();
+    };
+
     setSize(320, 200);
     setWantsKeyboardFocus(true);
 }
@@ -56,4 +66,13 @@ void SyncEditor::updatePlayStopButtonText()
 void SyncEditor::updateMasterSlaveButtonText()
 {
     masterSlaveButton.setButtonText(syncProcessor.isMaster() ? "master" : "slave");
+}
+
+void SyncEditor::updateTempoButtonText()
+{
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(1) << syncProcessor.getTempo();
+    std::string tempoString = ss.str();
+
+    tempoLabel.setText(tempoString, juce::dontSendNotification);
 }
