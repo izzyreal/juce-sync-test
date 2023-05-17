@@ -44,7 +44,7 @@ void MidiClockInput::handleTimingMessage(double bufOffsetSeconds)
 
     double averageBpm = (1.0 / (averageDelta * 24.0)) * 60.0;
 
-    printf("Avg BPM: %f\n", averageBpm);
+//    printf("Avg BPM: %f\n", averageBpm);
 
     if (lastKnownTempo != averageBpm)
     {

@@ -3,7 +3,9 @@
 #include "juce_audio_processors/juce_audio_processors.h"
 #include "SyncProcessor.hpp"
 
-class TempoLabel : public juce::Label {
+class TempoLabel : public juce::Label, public juce::Timer {
+    void timerCallback() override;
+
     juce::TextEditor* createEditorComponent() override
     {
         juce::TextEditor* const ed = Label::createEditorComponent();

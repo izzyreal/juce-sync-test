@@ -118,7 +118,8 @@ void SyncProcessor::processBlock(juce::AudioSampleBuffer &buf, juce::MidiBuffer 
 
             if (msg.isMidiClock())
             {
-                midiClockInput.handleTimingMessage(msg.getTimeStamp());
+                const auto bufOffsetSeconds = msg.getTimeStamp() * (1.0 / getSampleRate());
+                midiClockInput.handleTimingMessage(bufOffsetSeconds);
             }
         }
     }
@@ -261,11 +262,6 @@ void SyncProcessor::setTempo(float tempoToUse)
 {
     tempo.store(std::clamp<float>(tempoToUse, 30, 300));
     initSampleRateAndTempoDependentConstants(getSampleRate());
-
-    if (auto editor = getActiveEditor(); editor != nullptr)
-    {
-        dynamic_cast<SyncEditor*>(editor)->updateTempoButtonText();
-    }
 }
 
 float SyncProcessor::getTempo()

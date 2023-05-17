@@ -1,5 +1,10 @@
 #include "SyncEditor.hpp"
 
+void TempoLabel::timerCallback()
+{
+    dynamic_cast<SyncEditor*>(getParentComponent())->updateTempoButtonText();
+}
+
 SyncEditor::SyncEditor(SyncProcessor& p)
         : AudioProcessorEditor(&p), syncProcessor(p)
 {
@@ -41,6 +46,7 @@ SyncEditor::SyncEditor(SyncProcessor& p)
     tempoLabel.setBounds(150, 0, 50, 30);
     tempoLabel.setEditable(true);
     tempoLabel.setComponentID("tempo");
+    tempoLabel.startTimer(100);
 
     updateTempoButtonText();
     addAndMakeVisible(tempoLabel);
