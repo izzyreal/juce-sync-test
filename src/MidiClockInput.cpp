@@ -8,11 +8,11 @@ MidiClockInput::MidiClockInput()
     std::fill(deltas.begin(), deltas.end(), delta120Bpm);
 }
 
-void MidiClockInput::handleTimingMessage(double bufOffsetSeconds)
+void MidiClockInput::handleTimingMessage(long long frameCounter, double bufOffsetFrames, double sampleRate)
 {
-    const auto now = std::chrono::high_resolution_clock::now();
+    const auto now = static_cast<double>(frameCounter) + bufOffsetFrames;
 
-    const bool firstCall = previousNow == zero;
+    const bool firstCall = previousFrameCounter == 0;
 
     if (startIsArmed)
     {
@@ -22,29 +22,27 @@ void MidiClockInput::handleTimingMessage(double bufOffsetSeconds)
 
     if (firstCall)
     {
-        previousNow = now;
+        previousFrameCounter = now;
         return;
     }
 
-    long long delta = std::chrono::duration_cast<std::chrono::nanoseconds>(now-previousNow).count();
+    auto deltaInFrames = static_cast<double>(now - previousFrameCounter);
 
-    const double deltaInSeconds = (static_cast<double>(delta) / 1000000000.0) + (bufOffsetSeconds / 1000);
-
-//    printf("D: %f\n", deltaInSeconds);
-
-    deltas[deltaPointer++] = deltaInSeconds;
+    deltas[deltaPointer++] = deltaInFrames;
 
     if (deltaPointer == DELTA_COUNT) deltaPointer = 0;
 
-    previousNow = now;
+    previousFrameCounter = now;
 
-    auto averageDelta = std::reduce(deltas.begin(), deltas.end(), 0.0) / DELTA_COUNT;
+    auto averageDeltaInFrames = std::reduce(deltas.begin(), deltas.end(), 0.0) / DELTA_COUNT;
 
 //    printf("Avg delta: %f\n", averageDelta1);
 
-    double averageBpm = (1.0 / (averageDelta * 24.0)) * 60.0;
+    auto averageDeltaInSeconds = averageDeltaInFrames / sampleRate;
 
-//    printf("Avg BPM: %f\n", averageBpm);
+    double averageBpm = (1.0 / (averageDeltaInSeconds * 24.0)) * 60.0;
+
+    printf("Avg BPM: %f\n", averageBpm);
 
     if (lastKnownTempo != averageBpm)
     {
@@ -55,6 +53,6 @@ void MidiClockInput::handleTimingMessage(double bufOffsetSeconds)
 
 void MidiClockInput::handleStartMessage()
 {
-    previousNow = zero;
+    previousFrameCounter = 0;
     startIsArmed = true;
 }

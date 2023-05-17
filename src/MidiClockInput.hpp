@@ -1,13 +1,12 @@
 #pragma once
 
 #include <vector>
-#include <chrono>
 #include <functional>
 
 class MidiClockInput {
 public:
     MidiClockInput();
-    void handleTimingMessage(double bufOffsetMs);
+    void handleTimingMessage(long long frameCounter, double bufOffsetFrames, double sampleRate);
     void handleStartMessage();
 
     std::function<void(const float newTempo)> onTempoChange;
@@ -18,6 +17,5 @@ private:
     std::vector<double> deltas = std::vector<double>(DELTA_COUNT);
     unsigned int deltaPointer = 0;
     bool startIsArmed = false;
-    std::chrono::time_point<std::chrono::high_resolution_clock, std::chrono::nanoseconds> previousNow;
-    const std::chrono::time_point<std::chrono::high_resolution_clock, std::chrono::nanoseconds> zero;
+    long long previousFrameCounter = 0;
 };

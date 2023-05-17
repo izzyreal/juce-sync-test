@@ -118,8 +118,7 @@ void SyncProcessor::processBlock(juce::AudioSampleBuffer &buf, juce::MidiBuffer 
 
             if (msg.isMidiClock())
             {
-                const auto bufOffsetSeconds = msg.getTimeStamp() * (1.0 / getSampleRate());
-                midiClockInput.handleTimingMessage(bufOffsetSeconds);
+                midiClockInput.handleTimingMessage(frameCounter, msg.getTimeStamp(), getSampleRate());
             }
         }
     }
