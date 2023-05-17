@@ -44,10 +44,13 @@ public:
 
     void processBlock(juce::AudioSampleBuffer &, juce::MidiBuffer &) override;
 
-    bool hasEditor() const override
-    { return true; }
+    bool hasEditor() const override { return true; }
 
-    void playStop();
+    void togglePlayStop();
+    bool isPlaying();
+
+    void toggleMasterSlave();
+    bool isMaster();
 
 private:
     std::vector<short> metronomeSampleData{0, 2047, 4092, 6145, 8186, 10239, 12284, 14329, 14333, 14330, 14330, 14332,
@@ -69,6 +72,7 @@ private:
 
     int playStartFrame = -1;
     std::atomic<bool> playing{false };
+    std::atomic<bool> master{true };
     bool wasPlaying{false};
 
     bool internalSequencerShouldStartOnNextClock = false;

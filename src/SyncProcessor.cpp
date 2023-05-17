@@ -201,9 +201,24 @@ void SyncProcessor::processBlock(juce::AudioSampleBuffer &buf, juce::MidiBuffer 
     frameCounter += buf.getNumSamples();
 }
 
-void SyncProcessor::playStop()
+void SyncProcessor::togglePlayStop()
 {
     playing.store(!playing.load());
+}
+
+bool SyncProcessor::isPlaying()
+{
+    return playing.load();
+}
+
+void SyncProcessor::toggleMasterSlave()
+{
+    master.store(!master.load());
+}
+
+bool SyncProcessor::isMaster()
+{
+    return master.load();
 }
 
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
