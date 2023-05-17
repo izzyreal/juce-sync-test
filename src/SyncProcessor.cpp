@@ -1,6 +1,11 @@
 #include "SyncProcessor.hpp"
 #include "SyncEditor.hpp"
 
+SyncProcessor::SyncProcessor()
+{
+    midiClockInput.onTempoChange = [this](const float newTempo) { setTempo(newTempo); };
+}
+
 const juce::String SyncProcessor::getName() const
 {
     return JucePlugin_Name;
@@ -105,6 +110,19 @@ void SyncProcessor::setStateInformation(const void *data, int sizeInBytes)
 
 void SyncProcessor::processBlock(juce::AudioSampleBuffer &buf, juce::MidiBuffer &midiBuf)
 {
+    if (!isMaster())
+    {
+        for (const auto& meta : midiBuf)
+        {
+            auto msg = meta.getMessage();
+
+            if (msg.isMidiClock())
+            {
+                midiClockInput.handleTimingMessage(msg.getTimeStamp());
+            }
+        }
+    }
+
     midiBuf.clear();
 
     const float metronomeVolume = 0.7f;
@@ -132,19 +150,26 @@ void SyncProcessor::processBlock(juce::AudioSampleBuffer &buf, juce::MidiBuffer 
             eventAfterNFrames.frames += framesPerClock;
         }
 
-        eventAfterNFrames.f = [&midiBuf](int bufFrameOffset) {
-            const auto startMsg = juce::MidiMessage::midiStart();
-            midiBuf.addEvent(startMsg, bufFrameOffset);
+        if (isMaster())
+        {
+            eventAfterNFrames.f = [&midiBuf](int bufFrameOffset) {
+                const auto startMsg = juce::MidiMessage::midiStart();
+                midiBuf.addEvent(startMsg, bufFrameOffset);
 //            printf("sending start at bufFrameOffset %d\n", bufFrameOffset);
-        };
+            };
+        }
 
         internalSequencerShouldStartOnNextClock = true;
     }
     else if (justStopped)
     {
         justStopped = false;
-        const auto stopMsg = juce::MidiMessage::midiStop();
-        midiBuf.addEvent(stopMsg, 0);
+
+        if (isMaster())
+        {
+            const auto stopMsg = juce::MidiMessage::midiStop();
+            midiBuf.addEvent(stopMsg, 0);
+        }
 
         playStartFrame = -1;
         metronomeCounter = 3;
@@ -168,8 +193,11 @@ void SyncProcessor::processBlock(juce::AudioSampleBuffer &buf, juce::MidiBuffer 
         {
             const auto clockMsg = juce::MidiMessage::midiClock();
 
-            midiBuf.addEvent(clockMsg, i);
+            if (isMaster())
+            {
+                midiBuf.addEvent(clockMsg, i);
 //            printf("Sending clock at bufFrameOffset %d\n", i);
+            }
 
             nextClockIsInHowManyFrames = floor(framesPerClock);
 
@@ -233,6 +261,11 @@ void SyncProcessor::setTempo(float tempoToUse)
 {
     tempo.store(std::clamp<float>(tempoToUse, 30, 300));
     initSampleRateAndTempoDependentConstants(getSampleRate());
+
+    if (auto editor = getActiveEditor(); editor != nullptr)
+    {
+        dynamic_cast<SyncEditor*>(editor)->updateTempoButtonText();
+    }
 }
 
 float SyncProcessor::getTempo()

@@ -8,11 +8,11 @@ SyncEditor::SyncEditor(SyncProcessor& p)
     addAndMakeVisible(playStopButton);
 
     playStopButton.onClick = [this]{
-        if (syncProcessor.isMaster())
-        {
+//        if (syncProcessor.isMaster())
+//        {
             syncProcessor.togglePlayStop();
             updatePlayStopButtonText();
-        }
+//        }
     };
 
     masterSlaveButton.setBounds(75, 0, 75, 30);
@@ -40,6 +40,7 @@ SyncEditor::SyncEditor(SyncProcessor& p)
 
     tempoLabel.setBounds(150, 0, 50, 30);
     tempoLabel.setEditable(true);
+    tempoLabel.setComponentID("tempo");
 
     updateTempoButtonText();
     addAndMakeVisible(tempoLabel);

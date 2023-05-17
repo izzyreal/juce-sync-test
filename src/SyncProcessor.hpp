@@ -1,6 +1,7 @@
 #pragma once
 
 #include <juce_audio_utils/juce_audio_utils.h>
+#include "MidiClockInput.hpp"
 
 struct EventAfterNFrames {
     int frames = -1;
@@ -10,6 +11,8 @@ struct EventAfterNFrames {
 class SyncProcessor : public juce::AudioProcessor
 {
 public:
+    SyncProcessor();
+
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
 
     void releaseResources() override;
@@ -55,6 +58,8 @@ public:
     void setTempo(float tempo);
 
 private:
+    MidiClockInput midiClockInput;
+
     std::vector<short> metronomeSampleData{0, 2047, 4092, 6145, 8186, 10239, 12284, 14329, 14333, 14330, 14330, 14332,
                                            14330, 14331, 14330, 14330, 14333, 14329, 14333, 14328, 14335, 14329, 14331,
                                            14331, 14331, 14333, 14329, 14333, 14329, 14331, 14330, 14331, 14331, 14331,

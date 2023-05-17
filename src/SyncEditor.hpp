@@ -18,6 +18,8 @@ public:
 
     bool keyPressed(const juce::KeyPress& keyPress) override;
 
+    void updateTempoButtonText();
+
 private:
     SyncProcessor& syncProcessor;
     juce::TextButton playStopButton;
@@ -26,5 +28,4 @@ private:
 
     void updatePlayStopButtonText();
     void updateMasterSlaveButtonText();
-    void updateTempoButtonText();
 };
