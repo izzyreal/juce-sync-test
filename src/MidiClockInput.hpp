@@ -5,8 +5,7 @@
 
 class MidiClockInput {
 public:
-    MidiClockInput();
-    void handleTimingMessage(double framePos, double sampleRate);
+    void handleTimingMessage(double framePos);
     void handleStartMessage();
     void handleStopMessage();
 
@@ -14,9 +13,12 @@ public:
     std::function<void()> onStart;
     std::function<void()> onStop;
 
+    void setSampleRate(double sampleRate);
+
 private:
+    double sampleRate = 44100;
     unsigned int DELTA_COUNT = 100;
-    double lastKnownTempo = 0.0;
+    double lastKnownTempo = 120.0;
     std::vector<double> deltas = std::vector<double>(DELTA_COUNT);
     unsigned int deltaPointer = 0;
     bool startIsArmed = false;

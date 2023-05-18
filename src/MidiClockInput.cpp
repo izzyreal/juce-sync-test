@@ -2,13 +2,7 @@
 
 #include <numeric>
 
-MidiClockInput::MidiClockInput()
-{
-    const double delta120Bpm = 1.0 / 48.0;
-    std::fill(deltas.begin(), deltas.end(), delta120Bpm);
-}
-
-void MidiClockInput::handleTimingMessage(double framePos, double sampleRate)
+void MidiClockInput::handleTimingMessage(double framePos)
 {
     const bool firstCall = previousFrameCounter == 0;
 
@@ -54,4 +48,11 @@ void MidiClockInput::handleStartMessage()
 void MidiClockInput::handleStopMessage()
 {
     onStop();
+}
+
+void MidiClockInput::setSampleRate(double sampleRateToUse)
+{
+    sampleRate = sampleRateToUse;
+    const double deltaAtLastKnownTempoInFrames = (sampleRate / 48.0) * (120.0 / lastKnownTempo);
+    std::fill(deltas.begin(), deltas.end(), deltaAtLastKnownTempoInFrames);
 }

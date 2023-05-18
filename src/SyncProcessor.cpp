@@ -83,6 +83,7 @@ void SyncProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     playStartFrame = 0;
 
     initSampleRateAndTempoDependentConstants(sampleRate);
+    midiClockInput.setSampleRate(sampleRate);
 }
 
 void SyncProcessor::releaseResources()
@@ -121,7 +122,7 @@ void SyncProcessor::processBlock(juce::AudioSampleBuffer &buf, juce::MidiBuffer 
             if (msg.isMidiClock())
             {
                 const auto framePos = static_cast<double>(frameCounter) + msg.getTimeStamp();
-                midiClockInput.handleTimingMessage(framePos, getSampleRate());
+                midiClockInput.handleTimingMessage(framePos);
             }
             else if (msg.isMidiStart())
             {
