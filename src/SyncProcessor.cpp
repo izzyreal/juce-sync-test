@@ -4,6 +4,8 @@
 SyncProcessor::SyncProcessor()
 {
     midiClockInput.onTempoChange = [this](const float newTempo) { setTempo(newTempo); };
+    midiClockInput.onStart = [this]() { playing.store(true); };
+    midiClockInput.onStop = [this]() { playing.store(false); };
 }
 
 const juce::String SyncProcessor::getName() const
@@ -118,7 +120,16 @@ void SyncProcessor::processBlock(juce::AudioSampleBuffer &buf, juce::MidiBuffer 
 
             if (msg.isMidiClock())
             {
-                midiClockInput.handleTimingMessage(frameCounter, msg.getTimeStamp(), getSampleRate());
+                const auto framePos = static_cast<double>(frameCounter) + msg.getTimeStamp();
+                midiClockInput.handleTimingMessage(framePos, getSampleRate());
+            }
+            else if (msg.isMidiStart())
+            {
+                midiClockInput.handleStartMessage();
+            }
+            else if (msg.isMidiStop())
+            {
+                midiClockInput.handleStopMessage();
             }
         }
     }

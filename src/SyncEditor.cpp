@@ -3,6 +3,7 @@
 void TempoLabel::timerCallback()
 {
     dynamic_cast<SyncEditor*>(getParentComponent())->updateTempoButtonText();
+    dynamic_cast<SyncEditor*>(getParentComponent())->updatePlayStopButtonText();
 }
 
 SyncEditor::SyncEditor(SyncProcessor& p)

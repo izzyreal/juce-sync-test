@@ -8,41 +8,35 @@ MidiClockInput::MidiClockInput()
     std::fill(deltas.begin(), deltas.end(), delta120Bpm);
 }
 
-void MidiClockInput::handleTimingMessage(long long frameCounter, double bufOffsetFrames, double sampleRate)
+void MidiClockInput::handleTimingMessage(double framePos, double sampleRate)
 {
-    const auto now = static_cast<double>(frameCounter) + bufOffsetFrames;
-
     const bool firstCall = previousFrameCounter == 0;
 
     if (startIsArmed)
     {
         startIsArmed = false;
-        // onPlay
+        onStart();
     }
 
     if (firstCall)
     {
-        previousFrameCounter = now;
+        previousFrameCounter = framePos;
         return;
     }
 
-    auto deltaInFrames = static_cast<double>(now - previousFrameCounter);
+    auto deltaInFrames = static_cast<double>(framePos - previousFrameCounter);
 
     deltas[deltaPointer++] = deltaInFrames;
 
     if (deltaPointer == DELTA_COUNT) deltaPointer = 0;
 
-    previousFrameCounter = now;
+    previousFrameCounter = framePos;
 
     auto averageDeltaInFrames = std::reduce(deltas.begin(), deltas.end(), 0.0) / DELTA_COUNT;
-
-//    printf("Avg delta: %f\n", averageDelta1);
 
     auto averageDeltaInSeconds = averageDeltaInFrames / sampleRate;
 
     double averageBpm = (1.0 / (averageDeltaInSeconds * 24.0)) * 60.0;
-
-    printf("Avg BPM: %f\n", averageBpm);
 
     if (lastKnownTempo != averageBpm)
     {
@@ -55,4 +49,9 @@ void MidiClockInput::handleStartMessage()
 {
     previousFrameCounter = 0;
     startIsArmed = true;
+}
+
+void MidiClockInput::handleStopMessage()
+{
+    onStop();
 }
