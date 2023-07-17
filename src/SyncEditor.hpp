@@ -8,6 +8,7 @@ public:
     explicit SyncEditor(SyncProcessor&);
 
     bool keyPressed(const juce::KeyPress& keyPress) override;
+    void paint(juce::Graphics&) override;
 private:
     SyncProcessor& syncProcessor;
 };
